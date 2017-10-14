@@ -4,11 +4,10 @@
   "version": "0.1.0",
   "author": "Connor Kendrick",
 
-  "default_locale": "en",
   "description": "Replace Chrome's new tab page with a dashboard of your personal GitHub stats.",
   
   "chrome_url_overrides": {
-    "newtab": "index.html"
+    "newtab": "chromehub.html"
   },
 
   "permissions": [
