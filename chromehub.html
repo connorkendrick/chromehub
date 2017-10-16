@@ -1,9 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8"/>
     <title>New Tab</title>
+    <link rel="stylesheet" href="assets/css/style.css"/>
 </head>
 <body>
     <h1>ChromeHub</h1>
+
+    <div id="initial-landing-message">
+        <label>Hello, what's your GitHub username?</label>
+        <br/>
+        <input type="text" onkeydown="display(this)"/>
+    </div>
+
+    <div id="user-landing-message">
+        <h2 id="welcome-message"></h2>
+    </div>
+
+    <script src="assets/js/script.js"></script>
 </body>
 </html>
