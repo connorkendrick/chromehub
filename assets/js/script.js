@@ -1,13 +1,16 @@
-function display(ele) {
-    if (event.key === 'Enter' && ele.value != '') {
-        var message = "Hello, " + ele.value + ".";
-        document.getElementById('welcome-message').innerHTML = message;
-        document.getElementById('welcome-message').style.display = 'inline';
+var input = document.getElementById("user-input");
+input.addEventListener("keydown", function(event) {
+    if (event.keyCode === 13 && input.value != '') {
+        var welcomeMessage = document.getElementById('welcome-message');
+        var initialLandingMessage = document.getElementById('initial-landing-message');
 
-        hide(document.getElementById('initial-landing-message'));
-        show(document.getElementById('welcome-message'));
+        welcomeMessage.innerHTML = "Hello, " + input.value + ".";
+        welcomeMessage.style.display = 'inline';
+
+        hide(initialLandingMessage);
+        show(welcomeMessage);
     }
-}
+});
 
 function hide(ele) {
     ele.style.display = 'none';
