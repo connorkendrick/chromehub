@@ -9,6 +9,7 @@ function show(ele) {
 
 
 function displayInitialLanding() {
+    hide(document.getElementById('user-landing'));
     show(document.getElementById('initial-landing'));
 }
 
@@ -52,15 +53,12 @@ input.addEventListener('keydown', function(event) {
 });
 
 
+var reset = document.getElementById('reset');
+reset.addEventListener('click', function(event) {
+    chrome.storage.local.remove('username', function() {
+        displayInitialLanding();
+    });
+});
+
+
 load();
-//chrome.storage.local.remove('username');
-//chrome.storage.local.set({'username': 'connorkendrick'});
-//var obj = chrome.storage.local.get('username', function(result) {
-//    if (typeof result.username === 'undefined') {
-//        alert("This is undefined");
-//    }
-//    else {
-//        alert("This is defined");
-//        alert(result.username);
-//    }
-//});
