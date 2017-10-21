@@ -9,6 +9,15 @@
   "chrome_url_overrides": {
     "newtab": "chromehub.html"
   },
+    
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  },
+  
+  "browser_action": {
+    "default_title": "ChromeHub"
+  },
 
   "permissions": [
     "storage"
