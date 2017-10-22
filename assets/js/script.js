@@ -24,7 +24,7 @@ function displayUserLanding(username) {
 
 
 function load() {
-  chrome.storage.local.get('username', function(result) {
+  chrome.storage.sync.get('username', function(result) {
     show(document.getElementById('cover'));
         
     if (typeof result.username === 'undefined') {
@@ -38,7 +38,7 @@ function load() {
 
 
 function save(username, callback) {
-  chrome.storage.local.set({'username': username});
+  chrome.storage.sync.set({'username': username});
   callback();
 }
 
@@ -55,7 +55,7 @@ input.addEventListener('keydown', function(event) {
 
 var reset = document.getElementById('reset');
 reset.addEventListener('click', function(event) {
-  chrome.storage.local.remove('username', function() {
+  chrome.storage.sync.remove('username', function() {
     displayInitialLanding();
   });
 });
