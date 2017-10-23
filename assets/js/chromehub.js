@@ -23,36 +23,41 @@ function displayUserLanding(username) {
 }
 
 
-function load() {
-  chrome.storage.sync.get('username', function(result) {
-    show(document.getElementById('cover'));
-        
-    if (typeof result.username === 'undefined') {
-      displayInitialLanding();
-    }
-    else {
-      displayUserLanding(result.username);
-    }
+// Displays initial landing or user landing depending on presence of username
+function display(result) { 
+  show(document.getElementById('cover'));
+  
+  if (typeof result.username === 'undefined') {
+    displayInitialLanding();
+  }
+  else {
+    displayUserLanding(result.username);
+  }
+}
+
+
+// Loads the value at key 'username' in Chrome storage
+function init() {
+  // Call load() from storage.js and pass in the key and callback function
+  load('username', function(result) {
+    // Pass the resulting data to the callback function
+    display(result);
   });
 }
 
 
-function save(username, callback) {
-  chrome.storage.sync.set({'username': username});
-  callback();
-}
-
-
+// Listens for entry of username on initial landing
 var input = document.getElementById('user-input');
 input.addEventListener('keydown', function(event) {
   if (event.keyCode === 13 && input.value != '') {
-    save(input.value, function() {
-      load();
+    save('username', input.value, function() {
+      init();
     });
   }
 });
 
 
+// Listens for username reset on user landing
 var reset = document.getElementById('reset');
 reset.addEventListener('click', function(event) {
   chrome.storage.sync.remove('username', function() {
@@ -61,4 +66,4 @@ reset.addEventListener('click', function(event) {
 });
 
 
-load();
+init();
