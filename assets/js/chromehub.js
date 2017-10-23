@@ -1,32 +1,20 @@
-function hide(ele) {
-  ele.style.display = 'none';
-}
-
-
-function show(ele) {
-  ele.style.display = 'block';
-}
-
-
+// Displays screen where username is entered
 function displayInitialLanding() {
-  hide(document.getElementById('user-landing'));
-  show(document.getElementById('initial-landing'));
+  document.getElementById('user-landing').style.display = 'none';
+  document.getElementById('initial-landing').style.display = 'block';
 }
 
 
+// Displays screen with user-specific stats
 function displayUserLanding(username) {
-  hide(document.getElementById('initial-landing'));
-
+  document.getElementById('initial-landing').style.display = 'none';
   document.getElementById('welcome-message').innerHTML = "Hello, " + username + ".";
-
-  show(document.getElementById('user-landing'));
+  document.getElementById('user-landing').style.display = 'block';
 }
 
 
 // Displays initial landing or user landing depending on presence of username
 function display(result) { 
-  show(document.getElementById('cover'));
-  
   if (typeof result.username === 'undefined') {
     displayInitialLanding();
   }
