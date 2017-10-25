@@ -8,19 +8,19 @@ function ChromeHubStorage() {
    * Passes the item from storage with the specified key
    * to a specified callback function
    */
-  var load = function(key, callback) {
+  function load(key, callback) {
     chrome.storage.sync.get(key, function(result) {
       if (callback) {
         callback(result);
       }
     });
-  };
+  }
   
   /**
    * Saves an item to storage with specified key and value,
    * then calls the specified callback function if available
    */
-  var save = function(key, value, callback) {
+  function save(key, value, callback) {
     var obj = {};
     obj[key] = value;
     
@@ -29,19 +29,19 @@ function ChromeHubStorage() {
     if (callback) {
       callback();
     }
-  };
+  }
   
   /**
    * Removes an item from storage with a specified key,
    * then calls the specified callback function if available
    */
-  var remove = function(key, callback) {
+  function remove(key, callback) {
     chrome.storage.sync.remove(key);
     
     if (callback) {
       callback();
     }
-  };
+  }
   
   /**
    * Returns object with respective methods
