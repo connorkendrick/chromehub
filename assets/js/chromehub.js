@@ -1,3 +1,5 @@
+var storage = new ChromeHubStorage();
+
 // Displays screen where username is entered
 function displayInitialLanding() {
   document.getElementById('user-landing').style.display = 'none';
@@ -27,7 +29,7 @@ function display(result) {
 // Loads the value at key 'username' in Chrome storage
 function init() {
   // Call load() from storage.js and pass in the key and callback function
-  load('username', function(result) {
+  storage.load('username', function(result) {
     // Pass the resulting data to the callback function
     display(result);
   });
@@ -38,7 +40,7 @@ function init() {
 var input = document.getElementById('user-input');
 input.addEventListener('keydown', function(event) {
   if (event.keyCode === 13 && input.value != '') {
-    save('username', input.value, function() {
+    storage.save('username', input.value, function() {
       init();
     });
   }

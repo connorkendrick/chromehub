@@ -1,17 +1,63 @@
-function save(key, value, callback) {
-  // Create dict object using key and value passed in
-  var obj = {};
-  obj[key] = value;
+/**
+ * Storage functionalities to manipulate and retrieve
+ * data from Chrome storage
+ */
+function ChromeHubStorage() {
   
-  chrome.storage.sync.set(obj);
-
-  callback();
-}
-
-
-function load(key, callback) {
-  chrome.storage.sync.get(key, function(result) {
-    // Pass data retrieved from Chrome storage to callback
-    callback(result);
-  });
+  /**
+   * Passes the item from storage with the specified key
+   * to a specified callback function
+   */
+  var load = function(key, callback) {
+    chrome.storage.sync.get(key, function(result) {
+      if (callback) {
+        callback(result);
+      }
+    });
+  }
+  
+  /**
+   * Saves an item to storage with specified key and value,
+   * then calls the specified callback function if available
+   */
+  var save = function(key, value, callback) {
+    var obj = {};
+    obj[key] = value;
+    
+    chrome.storage.sync.set(obj);
+    
+    if (callback) {
+      callback();
+    }
+  }
+  
+  /**
+   * Removes an item from storage with a specified key,
+   * then calls the specified callback function if available
+   */
+  var remove = function(key, callback) {
+    chrome.storage.sync.remove(key);
+    
+    if (callback) {
+      callback();
+    }
+  }
+  
+  /**
+   * Make functions accessible from object
+   */
+  return {
+    load: function(key, callback) {
+      return load(key, callback);
+    },
+    
+    save: function(key, value, callback) {
+      return save(key, value, callback);
+    },
+    
+    remove: function(key, callback) {
+      return remove(key, callback);
+    }
+  };
+  
 }

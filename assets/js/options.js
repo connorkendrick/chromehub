@@ -1,3 +1,5 @@
+var storage = new ChromeHubStorage();
+
 // Display screen where API token is entered
 function displayTokenEntry() {
   document.getElementById('token-reset').style.display = 'none';
@@ -26,7 +28,7 @@ function display(result) {
 // Loads the value at key 'token' in Chrome storage
 function init() {
   // Call load() from storage.js and pass in the key and callback function
-  load('token', function(result) {
+  storage.load('token', function(result) {
     // Pass the resulting data to the callback function
     display(result);
   });
@@ -35,7 +37,7 @@ function init() {
 
 // Saves the entered token to Chrome storage and displays a message.
 function saveToken(value) {
-  save('token', value, function() {
+  storage.save('token', value, function() {
     document.getElementById('token-entry').innerHTML = 'Token saved successfully.';
   });
 }
