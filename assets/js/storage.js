@@ -14,7 +14,7 @@ function ChromeHubStorage() {
         callback(result);
       }
     });
-  }
+  };
   
   /**
    * Saves an item to storage with specified key and value,
@@ -29,7 +29,7 @@ function ChromeHubStorage() {
     if (callback) {
       callback();
     }
-  }
+  };
   
   /**
    * Removes an item from storage with a specified key,
@@ -41,10 +41,10 @@ function ChromeHubStorage() {
     if (callback) {
       callback();
     }
-  }
+  };
   
   /**
-   * Make functions accessible from object
+   * Returns object with respective methods
    */
   return {
     load: function(key, callback) {
