@@ -53,9 +53,7 @@ function ChromeHub() {
      * Remove username from storage when Reset button is clicked
      */
     userNameReset.addEventListener('click', function() {
-      storage.remove('username', function() {
-        init();
-      });
+      storage.remove('username');
     });
   }
   

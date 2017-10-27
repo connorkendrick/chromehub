@@ -35,12 +35,8 @@ function ChromeHubStorage() {
    * Removes an item from storage with a specified key,
    * then calls the specified callback function if available
    */
-  function remove(key, callback) {
+  function remove(key) {
     chrome.storage.sync.remove(key);
-    
-    if (callback) {
-      callback();
-    }
   }
   
   /**
@@ -55,8 +51,8 @@ function ChromeHubStorage() {
       return save(key, value, callback);
     },
     
-    remove: function(key, callback) {
-      return remove(key, callback);
+    remove: function(key) {
+      return remove(key);
     }
   };
   
