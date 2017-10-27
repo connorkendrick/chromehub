@@ -1,13 +1,22 @@
 {
   "manifest_version": 2,
   "name": "ChromeHub",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Connor Kendrick",
 
   "description": "Replace Chrome's new tab page with a dashboard of your personal GitHub stats.",
   
   "chrome_url_overrides": {
     "newtab": "chromehub.html"
+  },
+    
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  },
+  
+  "browser_action": {
+    "default_title": "ChromeHub"
   },
 
   "permissions": [
