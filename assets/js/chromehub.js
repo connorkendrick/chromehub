@@ -6,7 +6,10 @@ function ChromeHub() {
   
   var storage = new ChromeHubStorage();
   
-  var init = function() {
+  /**
+   * Initializes the page
+   */
+  function init() {
     bindInputs();
 
     storage.load('username', function(result) {
@@ -56,6 +59,9 @@ function ChromeHub() {
     });
   }
   
+  /**
+   * Returns object with respective methods
+   */
   return {
     init: init
   };
