@@ -4,6 +4,8 @@
  */
 function ChromeHub() {
   
+  var refreshRate   // Seconds required between refreshes
+  
   var storage = new ChromeHubStorage();
   
   /**
@@ -28,6 +30,34 @@ function ChromeHub() {
 
       toHide.style.display = 'none';
       toShow.style.display = 'block';
+    });
+  }
+  
+  /**
+   * Check for changed data if request attempt is successful
+   */
+  function refresh() {
+    // Set refresh rate according to token
+    storage.load('token', function(result) {
+      if (result.token) {
+        refreshRate = 10; // TODO: change to a specific value later
+      }
+      else {
+        refreshRate = 15; // TODO: change to a specific value later
+      }
+    });
+    
+    // Allow refresh if enough time has passed
+    storage.load('lastRefresh', function(result) {
+      var currentTime = new Date().getTime() / 1000;
+      
+      if (result.lastRefresh && (currentTime - result.lastRefresh < refreshRate)) {
+        //alert(refreshRate + ' seconds have not yet passed since last refresh.');
+        return;
+      }
+      
+      //alert('Refreshed');
+      storage.save('lastRefresh', currentTime);
     });
   }
   
@@ -61,7 +91,15 @@ function ChromeHub() {
    * Returns object with respective methods
    */
   return {
-    init: init
+    init: function() {
+      init();
+      this.refresh();
+    },
+    
+    refresh: function() {
+      refresh();
+      setInterval(refresh, 10000);
+    }
   };
 }
 
