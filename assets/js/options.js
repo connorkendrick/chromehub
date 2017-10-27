@@ -27,7 +27,7 @@ function ChromeHubOptions() {
      */
     tokenSaveButton.addEventListener('click', function() {
       if (tokenInputField.value != '') {
-        saveToken(value);
+        saveToken(tokenInputField.value);
       }
     });
 
@@ -35,9 +35,7 @@ function ChromeHubOptions() {
      * Remove token from storage when Reset button is clicked
      */
     tokenResetButton.addEventListener('click', function() {
-      storage.remove('token', function() {
-        displayTokenEntry();
-      });
+      storage.remove('token');
     });
   }
   
@@ -55,6 +53,8 @@ function ChromeHubOptions() {
    */
   return {
     init: function() {
+      bindInputs();
+      
       storage.load('token', function(result) {
         var toHide = document.getElementById('token-reset');
         var toShow = document.getElementById('token-entry');
@@ -68,8 +68,6 @@ function ChromeHubOptions() {
     
         toHide.style.display = 'none';
         toShow.style.display = 'block';
-        
-        bindInputs();
       });
     }
   };
