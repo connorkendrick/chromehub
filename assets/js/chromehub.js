@@ -26,6 +26,9 @@ function ChromeHub() {
         toShow = temp;
 
         document.getElementById('welcome-message').innerHTML = 'Hello, ' + result.username + '.';
+        
+        refresh();
+        setInterval(refresh, 10000);
       }
 
       toHide.style.display = 'none';
@@ -91,15 +94,7 @@ function ChromeHub() {
    * Returns object with respective methods
    */
   return {
-    init: function() {
-      init();
-      this.refresh();
-    },
-    
-    refresh: function() {
-      refresh();
-      setInterval(refresh, 10000);
-    }
+    init: init
   };
 }
 
