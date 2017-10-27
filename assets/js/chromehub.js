@@ -1,59 +1,67 @@
-var storage = new ChromeHubStorage();
+/**
+ * Displays a specified user's GitHub stats, and includes functionalities
+ * for the user to enter or reset their username
+ */
+function ChromeHub() {
+  
+  var storage = new ChromeHubStorage();
+  
+  var init = function() {
+    bindInputs();
 
-// Displays screen where username is entered
-function displayInitialLanding() {
-  document.getElementById('user-landing').style.display = 'none';
-  document.getElementById('initial-landing').style.display = 'block';
-}
+    storage.load('username', function(result) {
+      var toHide = document.getElementById('user-landing');
+      var toShow = document.getElementById('initial-landing');
 
+      // Swaps the elements to be hidden/shown if a username is found,
+      // and adds a custom welcome message for the user
+      if (result.username) {
+        var temp = toHide;
+        toHide = toShow;
+        toShow = temp;
 
-// Displays screen with user-specific stats
-function displayUserLanding(username) {
-  document.getElementById('initial-landing').style.display = 'none';
-  document.getElementById('welcome-message').innerHTML = "Hello, " + username + ".";
-  document.getElementById('user-landing').style.display = 'block';
-}
+        document.getElementById('welcome-message').innerHTML = 'Hello, ' + result.username + '.';
+      }
 
-
-// Displays initial landing or user landing depending on presence of username
-function display(result) { 
-  if (typeof result.username === 'undefined') {
-    displayInitialLanding();
-  }
-  else {
-    displayUserLanding(result.username);
-  }
-}
-
-
-// Loads the value at key 'username' in Chrome storage
-function init() {
-  // Call load() from storage.js and pass in the key and callback function
-  storage.load('username', function(result) {
-    // Pass the resulting data to the callback function
-    display(result);
-  });
-}
-
-
-// Listens for entry of username on initial landing
-var input = document.getElementById('user-input');
-input.addEventListener('keydown', function(event) {
-  if (event.keyCode === 13 && input.value != '') {
-    storage.save('username', input.value, function() {
-      init();
+      toHide.style.display = 'none';
+      toShow.style.display = 'block';
     });
   }
-});
+  
+  /**
+   * Add event listeners to all user inputs
+   */
+  function bindInputs() {
+    var userNameInput = document.getElementById('username-input');
+    var userNameReset = document.getElementById('username-reset');
+    
+    /**
+     * Save username to storage when Enter key is pressed
+     */
+    userNameInput.addEventListener('keydown', function(event) {
+      if (event.keyCode === 13 && userNameInput.value !== '') {
+        storage.save('username', userNameInput.value, function() {
+          init();
+        });
+      }
+    });
+    
+    /*
+     * Remove username from storage when Reset button is clicked
+     */
+    userNameReset.addEventListener('click', function() {
+      storage.remove('username', function() {
+        init();
+      });
+    });
+  }
+  
+  return {
+    init: init
+  };
+}
 
-
-// Listens for username reset on user landing
-var reset = document.getElementById('reset');
-reset.addEventListener('click', function(event) {
-  chrome.storage.sync.remove('username', function() {
-    displayInitialLanding();
-  });
-});
-
-
-init();
+(function() {
+  var tab = new ChromeHub();
+  tab.init();
+})();
