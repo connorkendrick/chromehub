@@ -4,7 +4,10 @@
  */
 function ChromeHub() {
   
-  var refreshRate   // Seconds required between refreshes
+  var username,                           // GitHub username entered by user
+      refreshRate,                        // Seconds required between refreshes
+      token = '',                         // GitHub API token
+      baseURL = 'https://api.github.com/' // Base URL of all requests
   
   var storage = new ChromeHubStorage();
   
@@ -13,19 +16,27 @@ function ChromeHub() {
    */
   function init() {
     bindInputs();
+    
+    storage.load('token', function(result) {
+      if (result.token) {
+        token = result.token;
+      }
+    });
 
     storage.load('username', function(result) {
       var toHide = document.getElementById('user-landing');
       var toShow = document.getElementById('initial-landing');
+      
+      username = result.username;
 
       // Swaps the elements to be hidden/shown if a username is found,
       // and adds a custom welcome message for the user
-      if (result.username) {
+      if (username) {
         var temp = toHide;
         toHide = toShow;
         toShow = temp;
 
-        document.getElementById('welcome-message').innerHTML = 'Hello, ' + result.username + '.';
+        document.getElementById('welcome-message').innerHTML = 'Hello, ' + username + '.';
         
         refresh();
         setInterval(refresh, 10000);
@@ -41,27 +52,45 @@ function ChromeHub() {
    */
   function refresh() {
     // Set refresh rate according to token
-    storage.load('token', function(result) {
-      if (result.token) {
-        refreshRate = 10; // TODO: change to a specific value later
-      }
-      else {
-        refreshRate = 15; // TODO: change to a specific value later
-      }
-    });
+    if (token) {
+      refreshRate = 10; // TODO: change to a specific value later
+    }
+    else {
+      refreshRate = 15; // TODO: change to a specific value later
+    }
     
     // Allow refresh if enough time has passed
     storage.load('lastRefresh', function(result) {
       var currentTime = new Date().getTime() / 1000;
       
       if (result.lastRefresh && (currentTime - result.lastRefresh < refreshRate)) {
-        //alert(refreshRate + ' seconds have not yet passed since last refresh.');
+        alert(refreshRate + ' seconds have not yet passed since last refresh.');
         return;
       }
       
-      //alert('Refreshed');
+      fetchData();
       storage.save('lastRefresh', currentTime);
     });
+  }
+  
+  /**
+   * Fetches the data for the username provided
+   */
+  function fetchData() {
+    alert('Fetching data...');
+    
+    var xhttp = new XMLHttpRequest();
+    
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var response = this.responseText;
+        var jsonResponse = JSON.parse(response);
+        alert(jsonResponse.login);
+      }
+    };
+    
+    xhttp.open('GET', baseURL + 'users/' + username, true);
+    xhttp.send();
   }
   
   /**
