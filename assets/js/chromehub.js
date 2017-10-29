@@ -68,7 +68,9 @@ function ChromeHub() {
         return;
       }
       
-      fetchData();
+      fetchData(function() {
+        displayData();
+      });
       storage.save('lastRefresh', currentTime);
     });
   }
@@ -76,7 +78,7 @@ function ChromeHub() {
   /**
    * Fetches the data for the username provided
    */
-  function fetchData() {
+  function fetchData(callback) {
     alert('Fetching data...');
     
     var xhttp = new XMLHttpRequest();
@@ -91,6 +93,15 @@ function ChromeHub() {
     
     xhttp.open('GET', baseURL + 'users/' + username, true);
     xhttp.send();
+    
+    callback();
+  }
+  
+  /**
+   * Displays the data on the page
+   */
+  function displayData() {
+    alert('data displayed');
   }
   
   /**
