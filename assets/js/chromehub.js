@@ -4,10 +4,11 @@
  */
 function ChromeHub() {
   
-  var username,                           // GitHub username entered by user
-      refreshRate,                        // Seconds required between refreshes
-      token = '',                         // GitHub API token
-      baseURL = 'https://api.github.com/' // Base URL of all requests
+  var username,                             // GitHub username entered by user
+      refreshRate,                          // Seconds required between refreshes
+      token = '',                           // GitHub API token
+      baseURL = 'https://api.github.com/',  // Base URL of all requests
+      userData                              // JSON object of retrieved user data
   
   var storage = new ChromeHubStorage();
   
@@ -68,9 +69,7 @@ function ChromeHub() {
         return;
       }
       
-      fetchData(function() {
-        displayData();
-      });
+      fetchData();
       storage.save('lastRefresh', currentTime);
     });
   }
@@ -78,7 +77,7 @@ function ChromeHub() {
   /**
    * Fetches the data for the username provided
    */
-  function fetchData(callback) {
+  function fetchData() {
     alert('Fetching data...');
     
     var xhttp = new XMLHttpRequest();
@@ -87,21 +86,20 @@ function ChromeHub() {
       if (this.readyState == 4 && this.status == 200) {
         var response = this.responseText;
         var jsonResponse = JSON.parse(response);
-        alert(jsonResponse.login);
+        userData = jsonResponse;
+        displayData();
       }
     };
-    
+
     xhttp.open('GET', baseURL + 'users/' + username, true);
     xhttp.send();
-    
-    callback();
   }
   
   /**
    * Displays the data on the page
    */
   function displayData() {
-    alert('data displayed');
+    document.getElementById('follower-count').innerHTML = ('<p>Followers: ' + userData.followers + '</p>');
   }
   
   /**
