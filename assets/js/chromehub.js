@@ -4,11 +4,10 @@
  */
 function ChromeHub() {
   
-  var username,                             // GitHub username entered by user
-      refreshRate,                          // Seconds required between refreshes
-      token = '',                           // GitHub API token
-      baseURL = 'https://api.github.com/',  // Base URL of all requests
-      userData                              // JSON object of retrieved user data
+  var username,                           // GitHub username entered by user
+      refreshRate,                        // Seconds required between refreshes
+      token = '',                         // GitHub API token
+      baseURL = 'https://api.github.com/' // Base URL of all requests
   
   var storage = new ChromeHubStorage();
   
@@ -38,6 +37,14 @@ function ChromeHub() {
         toShow = temp;
 
         document.getElementById('welcome-message').innerHTML = 'Hello, ' + username + '.';
+        
+        storage.remove('userData');
+        
+        storage.load('followers', function(result) {
+          if (result.followers) {
+            displayData();
+          }
+        });
         
         refresh();
         setInterval(refresh, 10000);
@@ -86,7 +93,8 @@ function ChromeHub() {
       if (this.readyState == 4 && this.status == 200) {
         var response = this.responseText;
         var jsonResponse = JSON.parse(response);
-        userData = jsonResponse;
+        var followers = jsonResponse.followers;
+        storage.save('followers', followers);
         displayData();
       }
     };
@@ -99,7 +107,11 @@ function ChromeHub() {
    * Displays the data on the page
    */
   function displayData() {
-    document.getElementById('follower-count').innerHTML = ('<p>Followers: ' + userData.followers + '</p>');
+    // Display number of followers
+    storage.load('followers', function(result) {
+      document.getElementById('follower-count').innerHTML = ('<p>Followers: ' + result.followers +
+                                                            '</p>');
+    });
   }
   
   /**
