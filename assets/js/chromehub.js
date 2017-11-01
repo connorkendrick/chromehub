@@ -72,7 +72,6 @@ function ChromeHub() {
       var currentTime = new Date().getTime() / 1000;
       
       if (result.lastRefresh && (currentTime - result.lastRefresh < refreshRate)) {
-        alert(refreshRate + ' seconds have not yet passed since last refresh.');
         return;
       }
       
@@ -84,9 +83,7 @@ function ChromeHub() {
   /**
    * Fetches the data for the username provided
    */
-  function fetchData() {
-    alert('Fetching data...');
-    
+  function fetchData() {    
     var xhttp = new XMLHttpRequest();
     
     xhttp.onreadystatechange = function() {
