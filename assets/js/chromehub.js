@@ -99,8 +99,14 @@ function ChromeHub() {
         displayData();
       }
     };
-
+    
     xhttp.open('GET', baseURL + 'users/' + username, true);
+    
+    if (token) {
+      var tokenValue = 'token ' + token;
+      xhttp.setRequestHeader('Authorization', tokenValue);
+    }
+    
     xhttp.send();
   }
   
