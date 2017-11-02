@@ -4,10 +4,11 @@
  */
 function ChromeHub() {
   
-  var username,                           // GitHub username entered by user
-      refreshRate,                        // Seconds required between refreshes
-      token = '',                         // GitHub API token
-      baseURL = 'https://api.github.com/' // Base URL of all requests
+  var username,                             // GitHub username entered by user
+      refreshRate,                          // Seconds required between refreshes
+      token = '',                           // GitHub API token
+      baseURL = 'https://api.github.com/',  // Base URL of all requests
+      userData;                             // JSON object of user data
   
   var storage = new ChromeHubStorage();
   
@@ -20,6 +21,12 @@ function ChromeHub() {
     storage.load('token', function(result) {
       if (result.token) {
         token = result.token;
+      }
+    });
+    
+    storage.load('userData', function(result) {
+      if (result.userData) {
+        userData = JSON.parse(result.userData);
       }
     });
 
@@ -38,13 +45,10 @@ function ChromeHub() {
 
         document.getElementById('welcome-message').innerHTML = 'Hello, ' + username + '.';
         
-        storage.remove('userData');
-        
-        storage.load('followers', function(result) {
-          if (result.followers) {
-            displayData();
-          }
-        });
+        // Display data if user data has already been fetched and stored before
+        if (userData) {
+          displayData();
+        }
         
         refresh();
         setInterval(refresh, 10000);
@@ -90,8 +94,8 @@ function ChromeHub() {
       if (this.readyState == 4 && this.status == 200) {
         var response = this.responseText;
         var jsonResponse = JSON.parse(response);
-        var followers = jsonResponse.followers;
-        storage.save('followers', followers);
+        userData = jsonResponse;
+        storage.save('userData', JSON.stringify(userData));
         displayData();
       }
     };
@@ -105,10 +109,8 @@ function ChromeHub() {
    */
   function displayData() {
     // Display number of followers
-    storage.load('followers', function(result) {
-      document.getElementById('follower-count').innerHTML = ('<p>Followers: ' + result.followers +
-                                                            '</p>');
-    });
+    document.getElementById('follower-count').innerHTML = ('<p>Followers: ' + userData.followers +
+                                                           '</p>');
   }
   
   /**
