@@ -17,7 +17,7 @@ function ChromeHub() {
    */
   function init() {
     bindInputs();
-    
+        
     storage.load('token', function(result) {
       if (result.token) {
         token = result.token;
@@ -110,6 +110,8 @@ function ChromeHub() {
   function displayData() {
     // Display number of followers
     document.getElementById('follower-count').innerHTML = ('<p>Followers: ' + userData.followers +
+                                                          '</p>');
+    document.getElementById('following-count').innerHTML = ('<p>Following: ' + userData.following +
                                                            '</p>');
   }
   
