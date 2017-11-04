@@ -8,8 +8,7 @@ function ChromeHub() {
       refreshRate,                          // Seconds required between refreshes
       token = '',                           // GitHub API token
       baseURL = 'https://api.github.com/',  // Base URL of all requests
-      userData,                             // JSON object of user data
-      eTag = '';                            // ETag of the last request (for caching)
+      userData;                             // JSON object of user data
   
   var storage = new ChromeHubStorage();
   
@@ -93,7 +92,6 @@ function ChromeHub() {
     
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-        eTag = this.getResponseHeader('etag').substring(2); // Move to chrome storage? Needed?
         var response = this.responseText;
         var jsonResponse = JSON.parse(response);
         userData = jsonResponse;
@@ -107,10 +105,6 @@ function ChromeHub() {
     if (token) {
       var tokenValue = 'token ' + token;
       xhttp.setRequestHeader('Authorization', tokenValue);
-    }
-    
-    if (eTag) {
-      xhttp.setRequestHeader('If-None-Match', eTag);
     }
         
     xhttp.send();
