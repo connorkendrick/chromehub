@@ -8,7 +8,8 @@ function ChromeHub() {
       refreshRate,                          // Seconds required between refreshes
       token = '',                           // GitHub API token
       baseURL = 'https://api.github.com/',  // Base URL of all requests
-      userData;                             // JSON object of user data
+      userData,                             // JSON object of user data
+      contributionsToday = 0;               // Number of contributions made by user today
   
   var storage = new ChromeHubStorage();
   
@@ -27,6 +28,12 @@ function ChromeHub() {
     storage.load('userData', function(result) {
       if (result.userData) {
         userData = JSON.parse(result.userData);
+      }
+    });
+    
+    storage.load('contributionsToday', function(result) {
+      if (result.contributionsToday) {
+        contributionsToday = result.contributionsToday;
       }
     });
 
@@ -85,29 +92,64 @@ function ChromeHub() {
   }
   
   /**
-   * Fetches the data for the username provided
+   * Makes an HTTP request to a specified URL, and runs the callback function
    */
-  function fetchData() {    
+  function makeRequest(url, callback) {
     var xhttp = new XMLHttpRequest();
     
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-        var response = this.responseText;
-        var jsonResponse = JSON.parse(response);
-        userData = jsonResponse;
-        storage.save('userData', JSON.stringify(userData));
-        displayData();
+        var response = this;
+        callback(response);
       }
     };
     
-    xhttp.open('GET', baseURL + 'users/' + username, true);
-    
+    xhttp.open('GET', url, true);
     if (token) {
       var tokenValue = 'token ' + token;
       xhttp.setRequestHeader('Authorization', tokenValue);
     }
-        
-    xhttp.send();
+    xhttp.send(null);
+  }
+  
+  /**
+   * Fetches the data for the username provided
+   */
+  function fetchData() {
+    // Fetch userData (followers/following)
+    var userDataURL = baseURL + 'users/' + username;
+    makeRequest(userDataURL, function(response) {
+      var responseText = response.responseText;
+      var jsonResponse = JSON.parse(responseText);
+      userData = jsonResponse;
+      storage.save('userData', JSON.stringify(userData));
+      displayData();
+    });
+    
+    // Fetch number of contributions made today
+    var contributionsURL = 'https://github.com/users/' + username + '/contributions';
+    makeRequest(contributionsURL, function(response) {
+      // Convert html string to DOM element
+      var parser = new DOMParser();
+      var domElement = parser.parseFromString(response.responseText, 'text/html');
+
+      // Collection of every week for the past 365 days
+      var year = domElement.getElementsByTagName('g');
+
+      // Collection of days for this week
+      var week = year.item(year.length - 1);
+      var days = week.children;
+
+      // Data for today
+      var today = days.item(days.length - 1);
+
+      // Number of contributions made today
+      var contributions = today.getAttribute('data-count');
+
+      contributionsToday = contributions;
+      storage.save('contributionsToday', contributions);
+      displayData();
+    });
   }
   
   /**
@@ -119,6 +161,7 @@ function ChromeHub() {
                                                           '</p>');
     document.getElementById('following-count').innerHTML = ('<p>Following: ' + userData.following +
                                                            '</p>');
+    document.getElementById('contributions-today').innerHTML = ('<p>Contributions made today: ' + contributionsToday + '</p>');
   }
   
   /**

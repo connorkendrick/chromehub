@@ -20,6 +20,8 @@
   },
 
   "permissions": [
-    "storage"
+    "storage",
+    "*://*.github.com/*",
+    "*://github.com/*"
   ]
 }
