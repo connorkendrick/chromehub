@@ -9,6 +9,8 @@ function ChromeHub() {
       token = '',                           // GitHub API token
       baseURL = 'https://api.github.com/',  // Base URL of all requests
       userData,                             // JSON object of user data
+      followers = 0,                        // Number of people following user
+      following = 0,                        // Number of people user is following
       contributionsToday = 0;               // Number of contributions made by user today
   
   var storage = new ChromeHubStorage();
@@ -31,9 +33,30 @@ function ChromeHub() {
       }
     });
     
+    storage.load('followers', function(result) {
+      if (result.followers) {
+        followers = result.followers;
+      }
+      else {
+        followers = 0;
+      }
+    });
+    
+    storage.load('following', function(result) {
+      if (result.following) {
+        following = result.following;
+      }
+      else {
+        following = 0;
+      }
+    });
+    
     storage.load('contributionsToday', function(result) {
       if (result.contributionsToday) {
         contributionsToday = result.contributionsToday;
+      }
+      else {
+        contributionsToday = 0;
       }
     });
 
@@ -122,7 +145,11 @@ function ChromeHub() {
       var responseText = response.responseText;
       var jsonResponse = JSON.parse(responseText);
       userData = jsonResponse;
+      followers = userData.followers;
+      following = userData.following;
       storage.save('userData', JSON.stringify(userData));
+      storage.save('followers', followers);
+      storage.save('following', following);
       displayData();
     });
     
@@ -157,9 +184,9 @@ function ChromeHub() {
    */
   function displayData() {
     // Display number of followers
-    document.getElementById('follower-count').innerHTML = ('<p>Followers: ' + userData.followers +
+    document.getElementById('follower-count').innerHTML = ('<p>Followers: ' + followers +
                                                           '</p>');
-    document.getElementById('following-count').innerHTML = ('<p>Following: ' + userData.following +
+    document.getElementById('following-count').innerHTML = ('<p>Following: ' + following +
                                                            '</p>');
     document.getElementById('contributions-today').innerHTML = ('<p>Contributions made today: ' + contributionsToday + '</p>');
   }
@@ -187,6 +214,9 @@ function ChromeHub() {
      */
     userNameReset.addEventListener('click', function() {
       storage.remove('username');
+      storage.remove('following');
+      storage.remove('followers');
+      storage.remove('contributionsToday');
     });
   }
   
