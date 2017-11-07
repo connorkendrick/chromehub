@@ -11,7 +11,8 @@ function ChromeHub() {
       userData,                             // JSON object of user data
       followers = 0,                        // Number of people following user
       following = 0,                        // Number of people user is following
-      contributionsToday = 0;               // Number of contributions made by user today
+      contributionsToday = 0,               // Number of contributions made by user today
+      streak = 0;                           // Days in a row user has made contributions
   
   var storage = new ChromeHubStorage();
   
@@ -57,6 +58,15 @@ function ChromeHub() {
       }
       else {
         contributionsToday = 0;
+      }
+    });
+    
+    storage.load('streak', function(result) {
+      if (result.streak) {
+        streak = result.streak;
+      }
+      else {
+        streak = 0;
       }
     });
 
@@ -175,6 +185,30 @@ function ChromeHub() {
 
       contributionsToday = contributions;
       storage.save('contributionsToday', contributions);
+      
+      // Calculate current contributions streak (number of days in a row)
+      var contributionsCount = 0;
+      forEachWeek:
+        for (var i = year.length - 1; i >= 0; i--) {
+          week = year.item(i);
+          days = week.children;
+          
+          forEachDay:
+            for (var j = days.length - 1; j >= 0; j--) {
+              today = days.item(j);
+              contributions = today.getAttribute('data-count');
+              if (contributions >= 1) {
+                  contributionsCount++;
+              }
+              else {
+                break forEachWeek;
+              }
+            }
+        }
+      
+      streak = contributionsCount;
+      storage.save('streak', streak);
+      
       displayData();
     });
   }
@@ -188,7 +222,10 @@ function ChromeHub() {
                                                           '</p>');
     document.getElementById('following-count').innerHTML = ('<p>Following: ' + following +
                                                            '</p>');
-    document.getElementById('contributions-today').innerHTML = ('<p>Contributions made today: ' + contributionsToday + '</p>');
+    document.getElementById('contributions-today').innerHTML = ('<p>Contributions made today: '+
+                                                               contributionsToday + '</p>');
+    document.getElementById('contributions-streak').innerHTML = ('<p>Current streak: ' + streak +
+                                                                ' days</p>');
   }
   
   /**
@@ -217,6 +254,7 @@ function ChromeHub() {
       storage.remove('following');
       storage.remove('followers');
       storage.remove('contributionsToday');
+      storage.remove('streak');
     });
   }
   
