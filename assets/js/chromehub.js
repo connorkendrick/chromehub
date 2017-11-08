@@ -12,7 +12,10 @@ function ChromeHub() {
       followers = 0,                        // Number of people following user
       following = 0,                        // Number of people user is following
       contributionsToday = 0,               // Number of contributions made by user today
-      streak = 0;                           // Days in a row user has made contributions
+      streak = 0,                           // Days in a row user has made contributions
+      repoLinks = [],                       // Links for user's pinned repositories
+      stars = 0,                            // Number of stars for user's pinned repositories
+      forks = 0;                            // Number of forks for user's pinned repositories
   
   var storage = new ChromeHubStorage();
   
@@ -67,6 +70,24 @@ function ChromeHub() {
       }
       else {
         streak = 0;
+      }
+    });
+    
+    storage.load('stars', function(result) {
+      if (result.stars) {
+        stars = result.stars;
+      }
+      else {
+        stars = 0;
+      }
+    });
+    
+    storage.load('forks', function(result) {
+      if (result.forks) {
+        forks = result.forks;
+      }
+      else {
+        forks = 0;
       }
     });
 
@@ -194,7 +215,7 @@ function ChromeHub() {
           days = week.children;
           
           forEachDay:
-            for (var j = days.length - 1; j >= 0; j--) {
+            for (var j = days.length - 2; j >= 0; j--) {
               today = days.item(j);
               contributions = today.getAttribute('data-count');
               if (contributions >= 1) {
@@ -208,6 +229,50 @@ function ChromeHub() {
       
       streak = contributionsCount;
       storage.save('streak', streak);
+      
+      displayData();
+    });
+    
+    // Fetch pinned repositories (for stars/forks)
+    var profileURL = 'https://github.com/' + username;
+    makeRequest(profileURL, function(response) {
+      // Convert html string to DOM element
+      var parser = new DOMParser();
+      var domElement = parser.parseFromString(response.responseText, 'text/html');
+            
+      // Container for all pinned repositories
+      var pinnedClass = domElement.getElementsByClassName('js-pinned-repos-reorder-container');
+      var board = pinnedClass.item(0);
+            
+      // List of all pinned repositories on board 
+      var listClass = board.getElementsByClassName('pinned-repos-list');
+      if (listClass.length != 0) {
+        var list = listClass.item(0);
+
+        // Collection of all repos (actual access to the list items)
+        var itemClass = list.getElementsByClassName('pinned-repo-item');
+        for (var i = 0; i < itemClass.length; i++) {
+          var item = itemClass.item(i);
+
+          var contentClass = item.getElementsByClassName('pinned-repo-item-content');
+          var content = contentClass.item(0);
+
+          var nameSpanClass = content.getElementsByClassName('d-block');
+          var nameSpan = nameSpanClass.item(0);
+
+          var repoNameClass = nameSpan.getElementsByTagName('a');
+          var repoName = repoNameClass.item(0);
+          var repoLink = repoName.getAttribute('href');
+
+          repoLinks[i] = repoLink;
+        }
+      }
+      
+      for (var i = 0; i < repoLinks.length; i++) {
+        // fetch stars and forks
+      }
+      
+      // Save stars and forks to chrome storage? Might happen in for loop.
       
       displayData();
     });
@@ -226,6 +291,10 @@ function ChromeHub() {
                                                                contributionsToday + '</p>');
     document.getElementById('contributions-streak').innerHTML = ('<p>Current streak: ' + streak +
                                                                 ' days</p>');
+    document.getElementById('pinned-repos-stars').innerHTML = ('<p>Stars for pinned repositories: ' +
+                                                             stars + '</p>');
+    document.getElementById('pinned-repos-forks').innerHTML = ('<p>Forks for pinned repositories: ' +
+                                                              forks + '</p>');
   }
   
   /**
