@@ -206,7 +206,7 @@ function ChromeHub() {
 
       contributionsToday = contributions;
       storage.save('contributionsToday', contributions);
-      
+            
       // Calculate current contributions streak (number of days in a row)
       var contributionsCount = 0;
       forEachWeek:
@@ -215,11 +215,14 @@ function ChromeHub() {
           days = week.children;
           
           forEachDay:
-            for (var j = days.length - 2; j >= 0; j--) {
+            for (var j = days.length - 1; j >= 0; j--) {
               today = days.item(j);
               contributions = today.getAttribute('data-count');
               if (contributions >= 1) {
                   contributionsCount++;
+              }
+              else if (i == year.length - 1 && j == days.length - 1) {
+                continue;
               }
               else {
                 break forEachWeek;
