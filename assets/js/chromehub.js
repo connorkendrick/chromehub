@@ -271,13 +271,61 @@ function ChromeHub() {
         }
       }
       
+      // Expression to request repository forks and count ones made today
+      forks = 0;
+      var parseForks = function(forksURL, page = 1) {
+        var forksURLPage = forksURL + page;
+        makeRequest(forksURLPage, function(response) {
+          var responseText = response.responseText;
+          // Array of JSON objects
+          var jsonResponse = JSON.parse(responseText);
+          
+          // For each fork
+          for (var i = 0; i < jsonResponse.length; i++) {
+            // Time in seconds of fork
+            var createdString = jsonResponse[i].created_at;
+            var createdTime = Date.parse(createdString) / 1000;
+            
+            // Current time in seconds
+            var currentTime = new Date().getTime() / 1000;
+            
+            var forkedToday = (currentTime - createdTime <= 86400);
+            
+            if (forkedToday) {
+              forks++;
+            }
+            else {
+              storage.save('forks', forks);
+              displayData();
+              break;
+            }
+            
+            // If the last fork on page was made today, request next page
+            if (i == jsonResponse.length - 1) {
+              parseForks(forksURL, page + 1);
+            }
+          }
+        });
+      };
+      
+      // Expression to request repository stars and count ones made today
+      var parseStars = function(starsURL, page) {
+        starsURL += page;
+        makeRequest(starsURL, function(response) {
+          console.log(starsURL);
+        });
+      };
+      
+      // Count forks and stars for each pinned repository
+      var URLParams = '?per_page=100&page=';
       for (var i = 0; i < repoLinks.length; i++) {
-        // fetch stars and forks
+        var repoURL = baseURL + 'repos' + repoLinks[i];
+        var forksURL = repoURL + '/forks' + URLParams;
+        var starsURL = repoURL + '/stargazers' + URLParams;
+        
+        parseForks(forksURL);
+        parseStars(starsURL);
       }
-      
-      // Save stars and forks to chrome storage? Might happen in for loop.
-      
-      displayData();
     });
   }
   
@@ -327,6 +375,8 @@ function ChromeHub() {
       storage.remove('followers');
       storage.remove('contributionsToday');
       storage.remove('streak');
+      storage.remove('forks');
+      storage.remove('stars');
     });
   }
   
