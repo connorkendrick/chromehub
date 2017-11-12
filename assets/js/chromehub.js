@@ -317,22 +317,11 @@ function ChromeHub() {
       var parseStars = function(starsURL, page = 1, firstCheck = true) {
         var starsURLPage = starsURL + page;
         makeRequest(starsURLPage, function(response) {
-          // FIRST CHECK
-          // Check if there are any pages after 1
-          // If so, go to last page and begin
-          
-          // BEGIN
-          // Iterate backwards through page (99 to 0)
-          // If date before today is met, exit
-          // If zero-th item (first item/last checked) is today and page != 1, go back a page and begin
-          // else, exit
-          
           if (firstCheck) {
             var pageInfo = response.getResponseHeader('link');
             if (pageInfo) {
               var lastPage = pageInfo.split(';')[1].split('&page=')[1].split('>')[0];
               parseStars(starsURL, lastPage, false);
-              //console.log(lastPage);
             }
           }
           
@@ -343,7 +332,7 @@ function ChromeHub() {
           
           // For each stargazer
           for (var i = jsonResponse.length - 1; i >= 0; i--) {
-            // Time in seconds of fork
+            // Time in seconds of star
             var createdString = jsonResponse[i].starred_at;
             var createdTime = Date.parse(createdString) / 1000;
             
@@ -364,7 +353,7 @@ function ChromeHub() {
             // If the last star checked on page was made today and page number is not 1,
             // check stars on previous page
             if (i == 0 && page != 1) {
-              parseForks(forksURL, page - 1, false);
+              parseStars(starsURL, page - 1, false);
             }
           }
         });
