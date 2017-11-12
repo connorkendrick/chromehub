@@ -163,6 +163,9 @@ function ChromeHub() {
       var tokenValue = 'token ' + token;
       xhttp.setRequestHeader('Authorization', tokenValue);
     }
+    if (url.includes('stargazers')) {
+      xhttp.setRequestHeader('Accept', 'application/vnd.github.v3.star+json');
+    }
     xhttp.send(null);
   }
   
@@ -309,10 +312,61 @@ function ChromeHub() {
       };
       
       // Expression to request repository stars and count ones made today
-      var parseStars = function(starsURL, page) {
-        starsURL += page;
-        makeRequest(starsURL, function(response) {
-          console.log(starsURL);
+      // Note: Stars are listed from oldest to newest, so we must iterate backwards
+      stars = 0;
+      var parseStars = function(starsURL, page = 1, firstCheck = true) {
+        var starsURLPage = starsURL + page;
+        makeRequest(starsURLPage, function(response) {
+          // FIRST CHECK
+          // Check if there are any pages after 1
+          // If so, go to last page and begin
+          
+          // BEGIN
+          // Iterate backwards through page (99 to 0)
+          // If date before today is met, exit
+          // If zero-th item (first item/last checked) is today and page != 1, go back a page and begin
+          // else, exit
+          
+          if (firstCheck) {
+            var pageInfo = response.getResponseHeader('link');
+            if (pageInfo) {
+              var lastPage = pageInfo.split(';')[1].split('&page=')[1].split('>')[0];
+              parseStars(starsURL, lastPage, false);
+              //console.log(lastPage);
+            }
+          }
+          
+          var responseText = response.responseText;
+          // Array of JSON objects
+          var jsonResponse = JSON.parse(responseText);
+          
+          
+          // For each stargazer
+          for (var i = jsonResponse.length - 1; i >= 0; i--) {
+            // Time in seconds of fork
+            var createdString = jsonResponse[i].starred_at;
+            var createdTime = Date.parse(createdString) / 1000;
+            
+            // Current time in seconds
+            var currentTime = new Date().getTime() / 1000;
+            
+            var starredToday = (currentTime - createdTime <= 86400);
+            
+            if (starredToday) {
+              stars++;
+            }
+            else {
+              storage.save('stars', stars);
+              displayData();
+              break;
+            }
+            
+            // If the last star checked on page was made today and page number is not 1,
+            // check stars on previous page
+            if (i == 0 && page != 1) {
+              parseForks(forksURL, page - 1, false);
+            }
+          }
         });
       };
       
