@@ -275,8 +275,9 @@ function ChromeHub() {
       }
       
       // Expression to request repository forks and count ones made today
-      forks = 0;
-      var parseForks = function(forksURL, page = 1) {
+      var forksToday = 0;
+      var currentRepo = 0;
+      var parseForks = function(forksURL, page, numRepos, callback) {
         var forksURLPage = forksURL + page;
         makeRequest(forksURLPage, function(response) {
           var responseText = response.responseText;
@@ -285,27 +286,38 @@ function ChromeHub() {
           
           // For each fork
           for (var i = 0; i < jsonResponse.length; i++) {
-            // Time in seconds of fork
+            // Year, month, and date fork was made
             var createdString = jsonResponse[i].created_at;
-            var createdTime = Date.parse(createdString) / 1000;
+            var yearMonthDay = createdString.split('T')[0].split('-');
+                                    
+            // Current time
+            var currentTime = new Date();
             
-            // Current time in seconds
-            var currentTime = new Date().getTime() / 1000;
-            
-            var forkedToday = (currentTime - createdTime <= 86400);
-            
+            // Compare today's date with fork creation date
+            var forkedToday = (currentTime.getFullYear() == yearMonthDay[0] &&
+                              currentTime.getMonth() + 1 == yearMonthDay[1] &&
+                              currentTime.getDate() == yearMonthDay[2]);
+                  
+            // If fork was made today, increase total sum
             if (forkedToday) {
-              forks++;
+              //alert('increase');
+              forksToday++;
             }
+            // If this is the last repo and no more forks made today were found, display forks
+            else if (currentRepo == numRepos) {
+              callback(forksToday);
+              break;
+            }
+            // If this isn't the last repo and no more forks today were found, increase amount of
+            // repos that have been checked
             else {
-              storage.save('forks', forks);
-              displayData();
+              currentRepo++;
               break;
             }
             
             // If the last fork on page was made today, request next page
             if (i == jsonResponse.length - 1) {
-              parseForks(forksURL, page + 1);
+              parseForks(forksURL, page + 1, numRepos, callback);
             }
           }
         });
@@ -366,7 +378,11 @@ function ChromeHub() {
         var forksURL = repoURL + '/forks' + URLParams;
         var starsURL = repoURL + '/stargazers' + URLParams;
         
-        parseForks(forksURL);
+        parseForks(forksURL, 1, repoLinks.length - 1, function(result) {
+          forks = result;
+          storage.save('forks', forks);
+          displayData();
+        });
         parseStars(starsURL);
       }
     });
