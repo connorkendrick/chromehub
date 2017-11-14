@@ -112,7 +112,8 @@ function ChromeHub() {
         }
         
         refresh();
-        setInterval(refresh, 10000);
+        // Attempt refresh every minute
+        setInterval(refresh, 60000);
       }
 
       toHide.style.display = 'none';
@@ -126,10 +127,14 @@ function ChromeHub() {
   function refresh() {
     // Set refresh rate according to token
     if (token) {
-      refreshRate = 10; // TODO: change to a specific value later
+      // Wait 2 minutes in between each refresh if token found
+      // Reason: Worst case is 127 requests per 1 refresh (5000 allowed in an hour)
+      refreshRate = 120;
     }
     else {
-      refreshRate = 15; // TODO: change to a specific value later
+      // Wait 20 minutes in between each refresh if no token found
+      // Reason: Worst case is 19 requests per 1 refresh (60 allowed in an hour)
+      refreshRate = 1200;
     }
     
     // Allow refresh if enough time has passed
