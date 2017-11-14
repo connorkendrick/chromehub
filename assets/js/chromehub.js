@@ -274,66 +274,87 @@ function ChromeHub() {
         }
       }
       
-      // Expression to request repository forks and count ones made today
+      // Value for if all fork requests have completed
+      var forksReady = false;
+      // Value for if all star requests have completed
+      var starsReady = false;
+      
+      // Number of repositories left to check
+      var reposRemainingForForks;
+      // Number of forks made today
       var forksToday = 0;
-      var currentRepo = 0;
-      var parseForks = function(forksURL, page, numRepos, callback) {
+      // Expression to request repository forks and count ones made today
+      var parseForks = function(forksURL, page) {
         var forksURLPage = forksURL + page;
-        makeRequest(forksURLPage, function(response) {
+        makeRequest(forksURLPage, function(response) {        
           var responseText = response.responseText;
           // Array of JSON objects
           var jsonResponse = JSON.parse(responseText);
           
+          --reposRemainingForForks;
+          
           // For each fork
           for (var i = 0; i < jsonResponse.length; i++) {
-            // Year, month, and date fork was made
+            // Time in milliseconds since epoch of fork creation 
             var createdString = jsonResponse[i].created_at;
+            // Corresponding year, month, and day of creation
             var yearMonthDay = createdString.split('T')[0].split('-');
                                     
-            // Current time
+            // Current time in milliseconds since epoch
             var currentTime = new Date();
             
-            // Compare today's date with fork creation date
+            // Compare current year, month, and date with fork creation date
             var forkedToday = (currentTime.getFullYear() == yearMonthDay[0] &&
                               currentTime.getMonth() + 1 == yearMonthDay[1] &&
                               currentTime.getDate() == yearMonthDay[2]);
                   
-            // If fork was made today, increase total sum
+            // If fork was made today, increase total number of forks made today
             if (forkedToday) {
-              //alert('increase');
-              forksToday++;
+              ++forksToday;
             }
-            // If this is the last repo and no more forks made today were found, display forks
-            else if (currentRepo == numRepos) {
-              callback(forksToday);
-              break;
-            }
-            // If this isn't the last repo and no more forks today were found, increase amount of
-            // repos that have been checked
             else {
-              currentRepo++;
+              // If this is the last repository to check
+              if (reposRemainingForForks <= 0) {
+                forks = forksToday;
+                storage.save('forks', forks);
+                forksReady = true;
+                
+                // Display data if all requests for forks and stars have completed
+                if (forksReady && starsReady) {
+                  displayData();
+                }
+              }
               break;
             }
             
-            // If the last fork on page was made today, request next page
+            // If the last fork on page was made today, request forks for next page
             if (i == jsonResponse.length - 1) {
-              parseForks(forksURL, page + 1, numRepos, callback);
+              parseForks(forksURL, page + 1);
             }
           }
         });
       };
       
+      // Number of repositories left to check
+      var reposRemainingForStars;
+      // Number of stars made today
+      var starsToday = 0;
       // Expression to request repository stars and count ones made today
-      // Note: Stars are listed from oldest to newest, so we must iterate backwards
-      stars = 0;
-      var parseStars = function(starsURL, page = 1, firstCheck = true) {
+      // Note: Stars are listed from oldest to newest, so this must iterate backwards
+      var parseStars = function(starsURL, page, firstCheck) {
         var starsURLPage = starsURL + page;
         makeRequest(starsURLPage, function(response) {
+          // If this is the first time the repository is being checked for stars
           if (firstCheck) {
+            // Find last page of stargazers from first page header info
             var pageInfo = response.getResponseHeader('link');
+            // If there is more than one page of stargazers
             if (pageInfo) {
+              // Parse 'link' header info to get last page
               var lastPage = pageInfo.split(';')[1].split('&page=')[1].split('>')[0];
+              // Restart repository search from last page
               parseStars(starsURL, lastPage, false);
+              return;
             }
           }
           
@@ -341,49 +362,62 @@ function ChromeHub() {
           // Array of JSON objects
           var jsonResponse = JSON.parse(responseText);
           
+          --reposRemainingForStars;
           
           // For each stargazer
           for (var i = jsonResponse.length - 1; i >= 0; i--) {
-            // Time in seconds of star
+            // Time in milliseconds since epoch of star creation
             var createdString = jsonResponse[i].starred_at;
-            var createdTime = Date.parse(createdString) / 1000;
+            // Corresponding year, month, and day of creation
+            var yearMonthDay = createdString.split('T')[0].split('-');
+                        
+            // Current time in milliseconds since epoch
+            var currentTime = new Date();
             
-            // Current time in seconds
-            var currentTime = new Date().getTime() / 1000;
+            // Compare current year, month, and date with star creation date
+            var starredToday = (currentTime.getFullYear() == yearMonthDay[0] &&
+                               currentTime.getMonth() + 1 == yearMonthDay[1] &&
+                               currentTime.getDate() == yearMonthDay[2]);
             
-            var starredToday = (currentTime - createdTime <= 86400);
-            
+            // If star was made today, increase total number of stars made today
             if (starredToday) {
-              stars++;
+              ++starsToday;
             }
             else {
-              storage.save('stars', stars);
-              displayData();
+              // If this is the last repository to check
+              if (reposRemainingForStars <= 0) {
+                stars = starsToday;
+                storage.save('stars', stars);
+                starsReady = true;
+                
+                // Display data if all requests for forks and stars have completed
+                if (forksReady && starsReady) {
+                  displayData();
+                }
+              }
               break;
             }
             
             // If the last star checked on page was made today and page number is not 1,
-            // check stars on previous page
-            if (i == 0 && page != 1) {
+            // request stargazers for previous page
+            if (i == 0 && page > 1) {
               parseStars(starsURL, page - 1, false);
             }
           }
         });
       };
       
-      // Count forks and stars for each pinned repository
+      reposRemainingForForks = repoLinks.length;
+      reposRemainingForStars = repoLinks.length;
       var URLParams = '?per_page=100&page=';
+      // Count forks and stars for each pinned repository
       for (var i = 0; i < repoLinks.length; i++) {
         var repoURL = baseURL + 'repos' + repoLinks[i];
         var forksURL = repoURL + '/forks' + URLParams;
         var starsURL = repoURL + '/stargazers' + URLParams;
-        
-        parseForks(forksURL, 1, repoLinks.length - 1, function(result) {
-          forks = result;
-          storage.save('forks', forks);
-          displayData();
-        });
-        parseStars(starsURL);
+                
+        parseForks(forksURL, 1);
+        parseStars(starsURL, 1, true);
       }
     });
   }
