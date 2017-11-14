@@ -274,10 +274,10 @@ function ChromeHub() {
         }
       }
       
-      // Value for if all fork requests have completed
-      var forksReady = false;
-      // Value for if all star requests have completed
-      var starsReady = false;
+      // Maximum number of forks/stars fetched if no token is found
+      const maxCountNoToken = 100;
+      // Maximum number of forks/stars fetched if token is found
+      const maxCountWithToken = 1000;
       
       // Number of repositories left to check
       var reposRemainingForForks;
@@ -286,12 +286,18 @@ function ChromeHub() {
       // Expression to request repository forks and count ones made today
       var parseForks = function(forksURL, page) {
         var forksURLPage = forksURL + page;
-        makeRequest(forksURLPage, function(response) {        
+        makeRequest(forksURLPage, function(response) {
           var responseText = response.responseText;
           // Array of JSON objects
           var jsonResponse = JSON.parse(responseText);
           
           --reposRemainingForForks;
+          
+          // If max amount of forks has been reached, exit request
+          if ((token && forksToday == (maxCountWithToken + '+')) || 
+              (!token && forksToday == (maxCountNoToken + '+'))) {
+            return;
+          }
           
           // For each fork
           for (var i = 0; i < jsonResponse.length; i++) {
@@ -308,21 +314,24 @@ function ChromeHub() {
                               currentTime.getMonth() + 1 == yearMonthDay[1] &&
                               currentTime.getDate() == yearMonthDay[2]);
                   
-            // If fork was made today, increase total number of forks made today
-            if (forkedToday) {
+            // If fork was made today and is less than limit, increase total number of forks made today
+            if ((forkedToday) && ((token && forksToday < maxCountWithToken) || 
+                                  (!token && forksToday < maxCountNoToken))) {
               ++forksToday;
             }
             else {
+              // If max limit has been reached for forks
+              if ((token && forksToday == maxCountWithToken) || 
+                  (!token && forksToday == maxCountNoToken)) {
+                forks = forksToday + '+';
+                storage.save('forks', forks);
+                displayData();
+              }
               // If this is the last repository to check
-              if (reposRemainingForForks <= 0) {
+              else if (reposRemainingForForks <= 0) {
                 forks = forksToday;
                 storage.save('forks', forks);
-                forksReady = true;
-                
-                // Display data if all requests for forks and stars have completed
-                if (forksReady && starsReady) {
-                  displayData();
-                }
+                displayData();
               }
               break;
             }
@@ -361,8 +370,14 @@ function ChromeHub() {
           var responseText = response.responseText;
           // Array of JSON objects
           var jsonResponse = JSON.parse(responseText);
-          
+                    
           --reposRemainingForStars;
+          
+          // If max amount of stars has been reached, exit request
+          if ((token && starsToday == (maxCountWithToken + '+')) || 
+              (!token && starsToday == (maxCountNoToken + '+'))) {
+            return;
+          }
           
           // For each stargazer
           for (var i = jsonResponse.length - 1; i >= 0; i--) {
@@ -379,21 +394,26 @@ function ChromeHub() {
                                currentTime.getMonth() + 1 == yearMonthDay[1] &&
                                currentTime.getDate() == yearMonthDay[2]);
             
-            // If star was made today, increase total number of stars made today
-            if (starredToday) {
+           // If star was made today and is less than limit, increase total number of stars made today
+            if ((starredToday) && ((token && starsToday < maxCountWithToken) || 
+                                  (!token && starsToday < maxCountNoToken))) {
               ++starsToday;
             }
             else {
+              
+              
+              // If max limit has been reached for stars
+              if ((token && starsToday == maxCountWithToken) || 
+                  (!token && starsToday == maxCountNoToken)) {
+                stars = starsToday + '+';
+                storage.save('stars', stars);
+                displayData();
+              }
               // If this is the last repository to check
-              if (reposRemainingForStars <= 0) {
+              else if (reposRemainingForStars <= 0) {
                 stars = starsToday;
                 storage.save('stars', stars);
-                starsReady = true;
-                
-                // Display data if all requests for forks and stars have completed
-                if (forksReady && starsReady) {
-                  displayData();
-                }
+                displayData();
               }
               break;
             }
