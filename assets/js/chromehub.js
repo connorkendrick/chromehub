@@ -5,6 +5,7 @@
 function ChromeHub() {
   
   var username,                             // GitHub username entered by user
+      name = ' ',                           // Actual name of user
       refreshRate,                          // Seconds required between refreshes
       token = '',                           // GitHub API token
       baseURL = 'https://api.github.com/',  // Base URL of all requests
@@ -34,6 +35,12 @@ function ChromeHub() {
     storage.load('userData', function(result) {
       if (result.userData) {
         userData = JSON.parse(result.userData);
+      }
+    });
+    
+    storage.load('name', function(result) {
+      if (result.name) {
+        name = result.name;
       }
     });
     
@@ -103,8 +110,6 @@ function ChromeHub() {
         var temp = toHide;
         toHide = toShow;
         toShow = temp;
-
-        document.getElementById('welcome-message').innerHTML = 'Hello, ' + username + '.';
         
         // Display data if user data has already been fetched and stored before
         if (userData) {
@@ -186,7 +191,9 @@ function ChromeHub() {
       userData = jsonResponse;
       followers = userData.followers;
       following = userData.following;
+      name = userData.name;
       storage.save('userData', JSON.stringify(userData));
+      storage.save('name', name);
       storage.save('followers', followers);
       storage.save('following', following);
       displayData();
@@ -451,17 +458,25 @@ function ChromeHub() {
    * Displays the data on the page
    */
   function displayData() {
+    // Display welcome message to user
+    var firstLast = name.split(' ');
+    document.getElementById('welcome-message').innerHTML = 'Hello, ' + firstLast[0] + '.';
     // Display number of followers
     document.getElementById('follower-count').innerHTML = ('<p>Followers: ' + followers +
                                                           '</p>');
+    // Display number of people following user
     document.getElementById('following-count').innerHTML = ('<p>Following: ' + following +
                                                            '</p>');
+    // Display contributions made today
     document.getElementById('contributions-today').innerHTML = ('<p>Contributions made today: '+
                                                                contributionsToday + '</p>');
+    // Display number of days in a row contributions have been made
     document.getElementById('contributions-streak').innerHTML = ('<p>Current streak: ' + streak +
                                                                 ' days</p>');
+    // Display number of stars gained today on pinned/popular repositories
     document.getElementById('pinned-repos-stars').innerHTML = ('<p>Stars for pinned repositories: ' +
                                                              stars + '</p>');
+    // Display number of forks made today on pinned/popular repositories
     document.getElementById('pinned-repos-forks').innerHTML = ('<p>Forks for pinned repositories: ' +
                                                               forks + '</p>');
   }
@@ -489,6 +504,7 @@ function ChromeHub() {
      */
     userNameReset.addEventListener('click', function() {
       storage.remove('username');
+      storage.remove('name');
       storage.remove('following');
       storage.remove('followers');
       storage.remove('contributionsToday');
