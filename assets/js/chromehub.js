@@ -1,3 +1,6 @@
+// TODO: add chart for week of contributions
+
+
 /**
  * Displays a specified user's GitHub stats, and includes functionalities
  * for the user to enter or reset their username
