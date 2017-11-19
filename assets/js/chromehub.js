@@ -1,6 +1,3 @@
-// TODO: add chart for week of contributions
-
-
 /**
  * Displays a specified user's GitHub stats, and includes functionalities
  * for the user to enter or reset their username
@@ -121,7 +118,8 @@ function ChromeHub() {
         
         refresh();
         // Attempt refresh every minute
-        setInterval(refresh, 60000);
+        //setInterval(refresh, 60000);
+        setInterval(refresh, 1000);
       }
 
       toHide.style.display = 'none';
@@ -137,7 +135,8 @@ function ChromeHub() {
     if (token) {
       // Wait 2 minutes in between each refresh if token found
       // Reason: Worst case is 127 requests per 1 refresh (5000 allowed in an hour)
-      refreshRate = 120;
+      //refreshRate = 120;
+      refreshRate = 10;
     }
     else {
       // Wait 20 minutes in between each refresh if no token found
@@ -482,6 +481,56 @@ function ChromeHub() {
     // Display number of forks made today on pinned/popular repositories
     document.getElementById('pinned-repos-forks').innerHTML = ('<p>Forks for pinned repositories: ' +
                                                               forks + '</p>');
+    
+    
+    // Create chart object and store it in Chrome storage if not found (before refresh is called)
+    // Get this week from contributions graph
+    // Have 2 arrays, one for days of the week and one for contributions for each day
+    // Fill arrays with data
+    // If arrays aren't stored in Chrome storage, store
+    // If they are, check against ones in storage
+    // If different, make an update to the chart object and store it again if needed
+    
+    var ctx = document.getElementById("myChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+            datasets: [{
+                label: '# of Votes',
+                data: [12, 19, 3, 5, 2, 3],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255,99,132,1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true
+                    }
+                }]
+            },
+            responsive: false
+        }
+    });
+    
+    
   }
   
   /**
