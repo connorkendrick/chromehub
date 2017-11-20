@@ -529,7 +529,7 @@ function ChromeHub() {
             responsive: false
         }
     });
-    
+    // ugh
     
   }
   
