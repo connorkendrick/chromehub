@@ -16,7 +16,8 @@ function ChromeHub() {
       streak = 0,                           // Days in a row user has made contributions
       repoLinks = [],                       // Links for user's pinned repositories
       stars = 0,                            // Number of stars for user's pinned repositories
-      forks = 0;                            // Number of forks for user's pinned repositories
+      forks = 0,                            // Number of forks for user's pinned repositories
+      graphCreated;                         // Whether a Chart.js object has been created yet
   
   var storage = new ChromeHubStorage();
   
@@ -97,6 +98,33 @@ function ChromeHub() {
         forks = 0;
       }
     });
+    
+    storage.load('contributionsGraph', function(result) {
+      if (result.contributionsGraph) {
+        graphCreated = true;
+      }
+      else {
+        graphCreated = false;
+      }
+    });
+    
+    storage.load('currentWeekDays', function(result) {
+      if (result.currentWeekDays) {
+        currentWeekDays = result.currentWeekDays;
+      }
+      else {
+        currentWeekDays = [];
+      }
+    });
+    
+    storage.load('currentWeekContributions', function(result) {
+      if (result.currentWeekContributions) {
+        currentWeekContributions = result.currentWeekContributions;
+      }
+      else {
+        currentWeekContributions = [];
+      }
+    });
 
     storage.load('username', function(result) {
       var toHide = document.getElementById('user-landing');
@@ -110,6 +138,39 @@ function ChromeHub() {
         var temp = toHide;
         toHide = toShow;
         toShow = temp;
+        
+        // Create a Chart.js object and store in Chrome storage if not found
+        if (!graphCreated) {
+          var ctx = document.getElementById('contributions-graph').getContext('2d');
+          var contributionsGraph = new Chart(ctx, {
+            type: 'line',
+            data: {
+              //labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+              datasets: [{
+                label: 'Contributions',
+                //data: [2, 2, 3, 1, 2, 3, 1],
+                borderColor: 'rgba(68, 163, 64, 1)',
+                backgroundColor: 'rgba(140, 198, 101, 0.2)',
+                borderWidth: 2,
+                lineTension: 0,
+                pointBackgroundColor: 'rgba(68, 163, 64, 1)'
+              }]
+            },
+            options: {
+              scales: {
+                yAxes: [{
+                  ticks: {
+                    beginAtZero: true,
+                    stepSize: 1
+                  }
+                }]
+              },
+              responsive: false
+            }
+          });
+          
+          storage.save('contributionsGraph', contributionsGraph);
+        }
         
         // Display data if user data has already been fetched and stored before
         if (userData) {
@@ -201,8 +262,9 @@ function ChromeHub() {
       displayData();
     });
     
-    // Fetch number of contributions made today
+    // URL for official contributions graph
     var contributionsURL = 'https://github.com/users/' + username + '/contributions';
+    // Request official contributions graph for user
     makeRequest(contributionsURL, function(response) {
       // Convert html string to DOM element
       var parser = new DOMParser();
@@ -223,6 +285,13 @@ function ChromeHub() {
 
       contributionsToday = contributions;
       storage.save('contributionsToday', contributions);
+      
+      // Calculate contributions made this week for contributions graph
+      var countTest = 0;
+      for (var currentDay = 0; currentDay < days.length; currentDay++) {
+        countTest++;
+      }
+      alert(countTest);
             
       // Calculate current contributions streak (number of days in a row)
       var contributionsCount = 0;
@@ -246,7 +315,7 @@ function ChromeHub() {
               }
             }
         }
-      
+      alert(contributionsCount);
       streak = contributionsCount;
       storage.save('streak', streak);
       
@@ -483,53 +552,42 @@ function ChromeHub() {
                                                               forks + '</p>');
     
     
-    // Create chart object and store it in Chrome storage if not found (before refresh is called)
-    // Get this week from contributions graph
+    // *Create chart object and store it in Chrome storage if not found (before refresh is called)
+    // *Get this week from contributions graph
     // Have 2 arrays, one for days of the week and one for contributions for each day
     // Fill arrays with data
     // If arrays aren't stored in Chrome storage, store
     // If they are, check against ones in storage
     // If different, make an update to the chart object and store it again if needed
     
-    var ctx = document.getElementById("myChart").getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'bar',
+    var ctx = document.getElementById('contributions-graph').getContext('2d');
+    var contributionsGraph = new Chart(ctx, {
+        type: 'line',
         data: {
-            labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             datasets: [{
-                label: '# of Votes',
-                data: [12, 19, 3, 5, 2, 3],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255,99,132,1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
+                label: 'Contributions',
+                data: [2, 2, 3, 1, 2, 3, 1],
+                borderColor: 'rgba(68,163,64, 1)',
+                backgroundColor: 'rgba(140,198,101,0.2)',
+                borderWidth: 2,
+                lineTension: 0,
+                pointBackgroundColor: 'rgba(68,163,64, 1)'
             }]
         },
         options: {
             scales: {
                 yAxes: [{
                     ticks: {
-                        beginAtZero:true
+                        beginAtZero:true,
+                        stepSize: 1,
                     }
                 }]
             },
             responsive: false
         }
     });
-    // ugh
+
     
   }
   
