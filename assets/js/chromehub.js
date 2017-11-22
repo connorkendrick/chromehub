@@ -17,7 +17,7 @@ function ChromeHub() {
       repoLinks = [],                       // Links for user's pinned repositories
       stars = 0,                            // Number of stars for user's pinned repositories
       forks = 0,                            // Number of forks for user's pinned repositories
-      graphCreated;                         // Whether a Chart.js object has been created yet
+      currentWeekContributions;             // Listing of number of contributions made each day
   
   var storage = new ChromeHubStorage();
   
@@ -49,9 +49,6 @@ function ChromeHub() {
       if (result.followers) {
         followers = result.followers;
       }
-      else {
-        followers = 0;
-      }
     });
     
     storage.load('following', function(result) {
@@ -67,17 +64,11 @@ function ChromeHub() {
       if (result.contributionsToday) {
         contributionsToday = result.contributionsToday;
       }
-      else {
-        contributionsToday = 0;
-      }
     });
     
     storage.load('streak', function(result) {
       if (result.streak) {
         streak = result.streak;
-      }
-      else {
-        streak = 0;
       }
     });
     
@@ -85,44 +76,17 @@ function ChromeHub() {
       if (result.stars) {
         stars = result.stars;
       }
-      else {
-        stars = 0;
-      }
     });
     
     storage.load('forks', function(result) {
       if (result.forks) {
         forks = result.forks;
       }
-      else {
-        forks = 0;
-      }
     });
-    
-    storage.load('contributionsGraph', function(result) {
-      if (result.contributionsGraph) {
-        graphCreated = true;
-      }
-      else {
-        graphCreated = false;
-      }
-    });
-    
-    storage.load('currentWeekDays', function(result) {
-      if (result.currentWeekDays) {
-        currentWeekDays = result.currentWeekDays;
-      }
-      else {
-        currentWeekDays = [];
-      }
-    });
-    
+        
     storage.load('currentWeekContributions', function(result) {
       if (result.currentWeekContributions) {
         currentWeekContributions = result.currentWeekContributions;
-      }
-      else {
-        currentWeekContributions = [];
       }
     });
 
@@ -139,38 +103,35 @@ function ChromeHub() {
         toHide = toShow;
         toShow = temp;
         
-        // Create a Chart.js object and store in Chrome storage if not found
-        if (!graphCreated) {
-          var ctx = document.getElementById('contributions-graph').getContext('2d');
-          var contributionsGraph = new Chart(ctx, {
-            type: 'line',
-            data: {
-              //labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-              datasets: [{
-                label: 'Contributions',
-                //data: [2, 2, 3, 1, 2, 3, 1],
-                borderColor: 'rgba(68, 163, 64, 1)',
-                backgroundColor: 'rgba(140, 198, 101, 0.2)',
-                borderWidth: 2,
-                lineTension: 0,
-                pointBackgroundColor: 'rgba(68, 163, 64, 1)'
+        // Create a Chart.js object and fill with currentWeekContributions array
+        var ctx = document.getElementById('contributions-graph').getContext('2d');
+        contributionsGraph = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            datasets: [{
+              label: 'Contributions',
+              data: currentWeekContributions,
+              borderColor: 'rgba(68, 163, 64, 1)',
+              backgroundColor: 'rgba(140, 198, 101, 0.2)',
+              borderWidth: 2,
+              lineTension: 0,
+              pointBackgroundColor: 'rgba(68, 163, 64, 1)'
+            }]
+          },
+          options: {
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true,
+                  stepSize: 1,
+                  suggestedMax: 5
+                }
               }]
             },
-            options: {
-              scales: {
-                yAxes: [{
-                  ticks: {
-                    beginAtZero: true,
-                    stepSize: 1
-                  }
-                }]
-              },
-              responsive: false
-            }
-          });
-          
-          storage.save('contributionsGraph', contributionsGraph);
-        }
+            responsive: false
+          }
+        });          
         
         // Display data if user data has already been fetched and stored before
         if (userData) {
@@ -286,12 +247,52 @@ function ChromeHub() {
       contributionsToday = contributions;
       storage.save('contributionsToday', contributions);
       
-      // Calculate contributions made this week for contributions graph
-      var countTest = 0;
-      for (var currentDay = 0; currentDay < days.length; currentDay++) {
-        countTest++;
+      var currentWeekContributionsTemp = [];
+      // Calculate contributions made this week for line graph
+      for (var currentDay = 0; currentDay < days.length; currentDay++) {    
+        currentWeekContributionsTemp.push(days.item(currentDay).getAttribute('data-count'));
       }
-      alert(countTest);
+      
+      // If array for contributions this week has been previously saved
+      if (currentWeekContributions) {
+        var contributionsChanged = false;
+        if (currentWeekContributions.length != currentWeekContributionsTemp.length) {
+          contributionsChanged = true;
+        }
+        else {
+          // Check every element for equivalence
+          for(var i = 0; i < currentWeekContributions.length; i++) {
+            if(currentWeekContributions[i] !== currentWeekContributionsTemp[i]) {
+              contributionsChanged = true;
+              break;
+            }
+          }
+        }
+        
+        // If the contributions array for this week has changed
+        if (contributionsChanged) {
+          // Remove current chart data
+          contributionsGraph.data.datasets[0].data.pop();
+          // Save current contributions data
+          currentWeekContributions = currentWeekContributionsTemp;
+          storage.save('currentWeekContributions', currentWeekContributions);
+          // Fill chart with current contributions data
+          contributionsGraph.data.datasets[0].data.push(currentWeekContributions);
+          // Update chart
+          contributionsGraph.update();
+          alert('graph should be updated   1');
+        }
+      }
+      else {
+        currentWeekContributions = currentWeekContributionsTemp;
+        storage.save('currentWeekContributions', currentWeekContributions);
+        contributionsGraph.data.datasets[0].data.push(currentWeekContributions);
+        contributionsGraph.data.datasets.forEach((dataset) => {
+          dataset.data.push(currentWeekContributions);
+        });
+        contributionsGraph.update();
+        //alert('graph should be updated    2');
+      }
             
       // Calculate current contributions streak (number of days in a row)
       var contributionsCount = 0;
@@ -315,7 +316,6 @@ function ChromeHub() {
               }
             }
         }
-      alert(contributionsCount);
       streak = contributionsCount;
       storage.save('streak', streak);
       
@@ -550,45 +550,6 @@ function ChromeHub() {
     // Display number of forks made today on pinned/popular repositories
     document.getElementById('pinned-repos-forks').innerHTML = ('<p>Forks for pinned repositories: ' +
                                                               forks + '</p>');
-    
-    
-    // *Create chart object and store it in Chrome storage if not found (before refresh is called)
-    // *Get this week from contributions graph
-    // Have 2 arrays, one for days of the week and one for contributions for each day
-    // Fill arrays with data
-    // If arrays aren't stored in Chrome storage, store
-    // If they are, check against ones in storage
-    // If different, make an update to the chart object and store it again if needed
-    
-    var ctx = document.getElementById('contributions-graph').getContext('2d');
-    var contributionsGraph = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            datasets: [{
-                label: 'Contributions',
-                data: [2, 2, 3, 1, 2, 3, 1],
-                borderColor: 'rgba(68,163,64, 1)',
-                backgroundColor: 'rgba(140,198,101,0.2)',
-                borderWidth: 2,
-                lineTension: 0,
-                pointBackgroundColor: 'rgba(68,163,64, 1)'
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero:true,
-                        stepSize: 1,
-                    }
-                }]
-            },
-            responsive: false
-        }
-    });
-
-    
   }
   
   /**
@@ -621,6 +582,7 @@ function ChromeHub() {
       storage.remove('streak');
       storage.remove('forks');
       storage.remove('stars');
+      storage.remove('currentWeekContributions');
     });
   }
   
