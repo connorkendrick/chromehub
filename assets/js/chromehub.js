@@ -269,15 +269,20 @@ function ChromeHub() {
         // If the contributions array for this week has changed
         if (contributionsChanged) {
           // Remove current chart data
-          for (var i = 0; i < contributionsGraph.data.datasets[0].data.length; i++) {
+          while (contributionsGraph.data.datasets[0].data.length > 0) {
             contributionsGraph.data.datasets[0].data.pop();
           }
           // Save current contributions data
           currentWeekContributions = currentWeekContributionsTemp;
           storage.save('currentWeekContributions', currentWeekContributions);
-          // Fill chart with current contributions data
-          for (var j = 0; j < currentWeekContributions.length; j++) {
-            contributionsGraph.data.datasets[0].data.push(currentWeekContributions[j]);
+          // Fill chart with current contributions data after chart is emptied
+          for (var i = 0; i < currentWeekContributions.length; i++) {
+            // Ugly way of handling async. But if I make anymore callbacks tonight I'll cry.
+            if (i == 0 && contributionsGraph.data.datasets[0].data.length != 0) {
+              i--;
+              continue;
+            }
+            contributionsGraph.data.datasets[0].data.push(currentWeekContributions[i]);
           }
           // Update chart
           contributionsGraph.update();
