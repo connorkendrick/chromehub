@@ -17,9 +17,19 @@
   <div id="user-landing">
     <h2 id="welcome-message"></h2>
     <a href="" id="username-reset">Click here to reset</a>
+    
+    <div id="follower-count"></div>
+    <div id="following-count"></div>
+    <div id="contributions-today"></div>
+    <div id="contributions-streak"></div>
+    <div id="pinned-repos-stars"></div>
+    <div id="pinned-repos-forks"></div>
   </div>
   
+  <script src="assets/js/Chart.js"></script>
   <script src="assets/js/storage.js"></script>
   <script src="assets/js/chromehub.js"></script>
+  
+  <canvas id="contributions-graph" width="400" height="400"></canvas>
 </body>
 </html>
