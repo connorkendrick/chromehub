@@ -121,8 +121,7 @@ function ChromeHub() {
               yAxes: [{
                 ticks: {
                   beginAtZero: true,
-                  stepSize: 1,
-                  suggestedMax: 5
+                  stepSize: 1
                 }
               }]
             },
