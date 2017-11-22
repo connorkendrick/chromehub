@@ -55,9 +55,6 @@ function ChromeHub() {
       if (result.following) {
         following = result.following;
       }
-      else {
-        following = 0;
-      }
     });
     
     storage.load('contributionsToday', function(result) {
@@ -273,25 +270,27 @@ function ChromeHub() {
         if (contributionsChanged) {
           // Remove current chart data
           contributionsGraph.data.datasets[0].data.pop();
+          for (var i = 0; i < contributionsGraph.data.datasets[0].data.length; i++) {
+            contributionsGraph.data.datasets[0].data.pop();
+          }
           // Save current contributions data
           currentWeekContributions = currentWeekContributionsTemp;
           storage.save('currentWeekContributions', currentWeekContributions);
           // Fill chart with current contributions data
-          contributionsGraph.data.datasets[0].data.push(currentWeekContributions);
+          for (var j = 0; j < currentWeekContributions.length; j++) {
+            contributionsGraph.data.datasets[0].data.push(currentWeekContributions[j]);
+          }
           // Update chart
           contributionsGraph.update();
-          alert('graph should be updated   1');
         }
       }
       else {
         currentWeekContributions = currentWeekContributionsTemp;
         storage.save('currentWeekContributions', currentWeekContributions);
-        contributionsGraph.data.datasets[0].data.push(currentWeekContributions);
-        contributionsGraph.data.datasets.forEach((dataset) => {
-          dataset.data.push(currentWeekContributions);
-        });
+        for (var i = 0; i < currentWeekContributions.length; i++) {
+          contributionsGraph.data.datasets[0].data.push(currentWeekContributions[i]);
+        }
         contributionsGraph.update();
-        //alert('graph should be updated    2');
       }
             
       // Calculate current contributions streak (number of days in a row)
