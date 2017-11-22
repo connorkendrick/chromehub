@@ -269,7 +269,6 @@ function ChromeHub() {
         // If the contributions array for this week has changed
         if (contributionsChanged) {
           // Remove current chart data
-          contributionsGraph.data.datasets[0].data.pop();
           for (var i = 0; i < contributionsGraph.data.datasets[0].data.length; i++) {
             contributionsGraph.data.datasets[0].data.pop();
           }
