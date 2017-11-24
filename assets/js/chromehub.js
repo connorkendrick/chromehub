@@ -88,8 +88,12 @@ function ChromeHub() {
     });
 
     storage.load('username', function(result) {
-      var toHide = document.getElementById('user-landing');
-      var toShow = document.getElementById('initial-landing');
+      // User landing
+      var toHide = document.getElementsByClassName('display-wrapper')[1];
+      console.log(toHide);
+      // Initial landing
+      var toShow = document.getElementsByClassName('display-wrapper')[0];
+      console.log(toShow);
       
       username = result.username;
 
@@ -136,8 +140,7 @@ function ChromeHub() {
         
         refresh();
         // Attempt refresh every minute
-        //setInterval(refresh, 60000);
-        setInterval(refresh, 1000);
+        setInterval(refresh, 60000);
       }
 
       toHide.style.display = 'none';
@@ -153,8 +156,7 @@ function ChromeHub() {
     if (token) {
       // Wait 2 minutes in between each refresh if token found
       // Reason: Worst case is 127 requests per 1 refresh (5000 allowed in an hour)
-      //refreshRate = 120;
-      refreshRate = 10;
+      refreshRate = 120;
     }
     else {
       // Wait 20 minutes in between each refresh if no token found
@@ -535,23 +537,23 @@ function ChromeHub() {
     var firstLast = name.split(' ');
     document.getElementById('welcome-message').innerHTML = 'Hello, ' + firstLast[0] + '.';
     // Display number of followers
-    document.getElementById('follower-count').innerHTML = ('<p>Followers: ' + followers +
-                                                          '</p>');
+    document.getElementById('follower-count').innerHTML = ('<h3>' + followers + '</h3>' +
+                                                           '<p>Followers</p>');
     // Display number of people following user
-    document.getElementById('following-count').innerHTML = ('<p>Following: ' + following +
-                                                           '</p>');
+    document.getElementById('following-count').innerHTML = ('<h3>' + following + '</h3>' +
+                                                           '<p>Following</p>');
     // Display contributions made today
-    document.getElementById('contributions-today').innerHTML = ('<p>Contributions made today: '+
-                                                               contributionsToday + '</p>');
+    document.getElementById('contributions-today').innerHTML = ('<h3>' + contributionsToday + '</h3>' +
+                                                                '<p>Contributions made today</p>');
     // Display number of days in a row contributions have been made
-    document.getElementById('contributions-streak').innerHTML = ('<p>Current streak: ' + streak +
-                                                                ' days</p>');
+    document.getElementById('contributions-streak').innerHTML = ('<h3>' + streak + '</h3>' +
+                                                                 '<p>Day contribution streak</p>');
     // Display number of stars gained today on pinned/popular repositories
-    document.getElementById('pinned-repos-stars').innerHTML = ('<p>Stars for pinned repositories: ' +
-                                                             stars + '</p>');
+    document.getElementById('pinned-repos-stars').innerHTML = ('<h3>' + stars + '</h3>' +
+                                                               '<p>New stars today on pinned repos</p>');
     // Display number of forks made today on pinned/popular repositories
-    document.getElementById('pinned-repos-forks').innerHTML = ('<p>Forks for pinned repositories: ' +
-                                                              forks + '</p>');
+    document.getElementById('pinned-repos-forks').innerHTML = ('<h3>' + forks + '</h3>' +
+                                                               '<p>New forks today on pinned repos</p>');
   }
   
   /**

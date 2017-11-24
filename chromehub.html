@@ -6,30 +6,37 @@
   <link rel="stylesheet" href="assets/css/style.css"/>
 </head>
 <body>
-  <h1>ChromeHub</h1>
-
-  <div id="initial-landing">
-    <label>Hello, what's your GitHub username?</label>
-    <br/>
-    <input type="text" id="username-input"/>
+  <div class="display-wrapper">
+    <div id="initial-landing">
+      <label>Hello, what's your GitHub username?</label>
+      <br/>
+      <input type="text" id="username-input"/>
+    </div>
   </div>
 
-  <div id="user-landing">
-    <h2 id="welcome-message"></h2>
-    <a href="" id="username-reset">Click here to reset</a>
-    
-    <div id="follower-count"></div>
-    <div id="following-count"></div>
-    <div id="contributions-today"></div>
-    <div id="contributions-streak"></div>
-    <div id="pinned-repos-stars"></div>
-    <div id="pinned-repos-forks"></div>
+  <div class="display-wrapper">
+    <div id="user-landing">
+      <h2 id="welcome-message"></h2>
+      
+      <div id="text-info-wrapper">
+        <div id="follower-count" class="square"></div>
+        <div id="following-count" class="square"></div>
+        <div id="contributions-today" class="square"></div>
+        <div id="contributions-streak" class="square"></div>
+        <div id="pinned-repos-stars" class="square"></div>
+        <div id="pinned-repos-forks" class="square"></div>
+
+        <a href="" id="username-reset">Change users</a>
+      </div>
+      
+      <div id="chart-wrapper">
+        <canvas id="contributions-graph" width="500" height="500"></canvas>
+      </div>
+    </div>
   </div>
   
   <script src="assets/js/Chart.js"></script>
   <script src="assets/js/storage.js"></script>
   <script src="assets/js/chromehub.js"></script>
-  
-  <canvas id="contributions-graph" width="400" height="400"></canvas>
 </body>
 </html>
