@@ -544,16 +544,16 @@ function ChromeHub() {
                                                            '<p>Following</p>');
     // Display contributions made today
     document.getElementById('contributions-today').innerHTML = ('<h3>' + contributionsToday + '</h3>' +
-                                                                '<p>Contributions made today</p>');
+                                                                '<p>Contributions today</p>');
     // Display number of days in a row contributions have been made
-    document.getElementById('contributions-streak').innerHTML = ('<h3>' + streak + '</h3>' +
-                                                                 '<p>Day contribution streak</p>');
+    document.getElementById('contributions-streak').innerHTML = ('<h3>' + streak + ' days</h3>' +
+                                                                 '<p>Contribution streak</p>');
     // Display number of stars gained today on pinned/popular repositories
     document.getElementById('pinned-repos-stars').innerHTML = ('<h3>' + stars + '</h3>' +
-                                                               '<p>New stars today on pinned repos</p>');
+                                                               '<p>New stars today</p>');
     // Display number of forks made today on pinned/popular repositories
     document.getElementById('pinned-repos-forks').innerHTML = ('<h3>' + forks + '</h3>' +
-                                                               '<p>New forks today on pinned repos</p>');
+                                                               '<p>New forks today</p>');
   }
   
   /**

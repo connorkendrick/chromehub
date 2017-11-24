@@ -100,17 +100,17 @@ label {
 }
 
 #pinned-repos-stars {
-  background-color: #ff6d56;
-}
-
-#pinned-repos-forks {
-  background-color: #fa99b4;
-}
-
-#follower-count {
   background-color: #fbc227;
 }
 
-#following-count {
+#pinned-repos-forks {
   background-color: #3ec446;
+}
+
+#follower-count {
+  background-color: #ff6d56;
+}
+
+#following-count {
+  background-color: #fa99b4;
 }
