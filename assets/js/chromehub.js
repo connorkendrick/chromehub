@@ -90,10 +90,8 @@ function ChromeHub() {
     storage.load('username', function(result) {
       // User landing
       var toHide = document.getElementsByClassName('display-wrapper')[1];
-      console.log(toHide);
       // Initial landing
       var toShow = document.getElementsByClassName('display-wrapper')[0];
-      console.log(toShow);
       
       username = result.username;
 
@@ -145,6 +143,10 @@ function ChromeHub() {
 
       toHide.style.display = 'none';
       toShow.style.display = 'block';
+      
+      setTimeout(function() {
+        fadeIn(toShow);
+      }, 25);
     });
   }
   
@@ -568,9 +570,12 @@ function ChromeHub() {
      */
     userNameInput.addEventListener('keydown', function(event) {
       if (event.keyCode === 13 && userNameInput.value !== '') {
-        storage.save('username', userNameInput.value, function() {
-          init();
-        });
+        fadeOut(document.getElementById('initial-landing'));
+        setTimeout(function() {
+          storage.save('username', userNameInput.value, function() {
+            init();
+          });
+        }, 1200);
       }
     });
     
@@ -588,6 +593,36 @@ function ChromeHub() {
       storage.remove('stars');
       storage.remove('currentWeekContributions');
     });
+  }
+  
+  /**
+   * Fade out content (change opacity from 1 to 0)
+   */
+  function fadeOut(element) {
+    var initialOpacity = 1;
+    var timer = setInterval(function() {
+      if (initialOpacity <= 0.01){
+        clearInterval(timer);
+      }
+      element.style.opacity = initialOpacity;
+      element.style.filter = 'alpha(opacity=' + initialOpacity * 100 + ')';
+      initialOpacity -= initialOpacity * 0.1;
+    }, 25);
+  }
+  
+  /**
+   * Fade in content (change opacity from 0 to 1)
+   */
+  function fadeIn(element) {
+    var initialOpacity = 0.1;
+      var timer = setInterval(function() {
+      if (initialOpacity >= 1){
+        clearInterval(timer);
+      }
+      element.style.opacity = initialOpacity;
+      element.style.filter = 'alpha(opacity=' + initialOpacity * 100 + ')';
+      initialOpacity += initialOpacity * 0.1;
+    }, 30);
   }
   
   /**
