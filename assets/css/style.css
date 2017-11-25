@@ -36,10 +36,11 @@ label {
 
 #welcome-message {
   text-align: center;
-  height: 3em;
-  line-height: 3em;
+  height: 4em;
+  line-height: 4em;
   font-size: 2em;
   margin: 0;
+  margin-bottom: 5vw;
 }
 
 #text-info-wrapper, #chart-wrapper {
@@ -48,18 +49,13 @@ label {
 
 #text-info-wrapper {
   float: right;
-  margin-top: 7%;
 }
 
 #chart-wrapper {
-  position: absolute;
-  bottom: 0;
-  top: 0;
   float: left;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
 }
 
 /* Grid code inspired by patrickkunka on Codepen.io */
@@ -89,6 +85,7 @@ label {
   right: 0;
   bottom: 0;
   padding: 10px;
+  position: fixed;
 }
 
 #contributions-today {
@@ -113,4 +110,55 @@ label {
 
 #following-count {
   background-color: #fa99b4;
+}
+
+@media only screen and (max-width: 1030px) {
+  #chart-wrapper {
+    display: inline-block;
+  }
+  
+  #text-info-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+    margin-top: 4vw;
+  }
+  
+  .square {
+    margin: 0;
+    width: 100%;
+    height: 6em;
+  }
+  
+  .square h3 {
+    font-size: 2em;
+    float: left;
+    margin: 0.75em;
+  }
+
+  .square p {
+    font-size: 1em;
+    font-weight: bold;
+    margin: 2.5em;
+    float: right;
+  }
+}
+
+@media only screen and (max-width: 830px) {
+  #chart-wrapper {
+    display: none;
+  }
+  
+  #text-info-wrapper {
+    float: left;
+    width: 100%;
+  }
+  
+  .square p {
+    margin: 2.5em;
+  }
+  
+  .square h3 {
+    margin: 0.75em;
+  }
 }
