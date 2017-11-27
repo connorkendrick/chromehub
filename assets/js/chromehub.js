@@ -144,9 +144,12 @@ function ChromeHub() {
       toHide.style.display = 'none';
       toShow.style.display = 'block';
       
+//      setTimeout(function() {
+//        fadeIn(toShow);
+//      }, 25);
       setTimeout(function() {
         fadeIn(toShow);
-      }, 25);
+      }, 500);
     });
   }
   
@@ -399,9 +402,9 @@ function ChromeHub() {
             var currentTime = new Date();
             
             // Compare current year, month, and date with fork creation date
-            var forkedToday = (currentTime.getFullYear() == yearMonthDay[0] &&
-                              currentTime.getMonth() + 1 == yearMonthDay[1] &&
-                              currentTime.getDate() == yearMonthDay[2]);
+            var forkedToday = (currentTime.getUTCFullYear() == yearMonthDay[0] &&
+                              currentTime.getUTCMonth() + 1 == yearMonthDay[1] &&
+                              currentTime.getUTCDate() == yearMonthDay[2]);
                   
             // If fork was made today and is less than limit, increase total number of forks made today
             if ((forkedToday) && ((token && forksToday < maxCountWithToken) || 
@@ -477,11 +480,11 @@ function ChromeHub() {
                         
             // Current time in milliseconds since epoch
             var currentTime = new Date();
-            
+                        
             // Compare current year, month, and date with star creation date
-            var starredToday = (currentTime.getFullYear() == yearMonthDay[0] &&
-                               currentTime.getMonth() + 1 == yearMonthDay[1] &&
-                               currentTime.getDate() == yearMonthDay[2]);
+            var starredToday = (currentTime.getUTCFullYear() == yearMonthDay[0] &&
+                               currentTime.getUTCMonth() + 1 == yearMonthDay[1] &&
+                               currentTime.getUTCDate() == yearMonthDay[2]);
             
            // If star was made today and is less than limit, increase total number of stars made today
             if ((starredToday) && ((token && starsToday < maxCountWithToken) || 
